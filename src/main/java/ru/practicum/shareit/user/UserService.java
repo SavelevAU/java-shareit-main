@@ -13,5 +13,4 @@ public interface UserService {
     UserDto getUserById(Long userId);
 
     List<UserDto> getAllUsers();
-    
 }

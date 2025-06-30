@@ -13,5 +13,4 @@ public interface ItemRequestService {
     List<ItemRequestDto> getAllRequests();
 
     ItemRequestDto getRequestById(Long requestId);
-
 }
