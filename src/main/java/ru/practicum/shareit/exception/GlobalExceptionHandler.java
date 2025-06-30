@@ -14,6 +14,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
     public Map<String, String> handleNotFound(NotFoundException ex) {
-        return Collections.singletonMap("error", ex.getMessage());
+        return Map.of("error", ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConflictException.class)
+    public Map<String, String> handleConflict(ConflictException ex) {
+        return Map.of("error", ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public Map<String, String> handleServerError(Exception ex) {
+        return Map.of("error", "Internal server error: " + ex.getMessage());
     }
 }

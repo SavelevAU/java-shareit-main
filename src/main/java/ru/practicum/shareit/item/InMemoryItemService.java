@@ -63,12 +63,16 @@ public class InMemoryItemService implements ItemService {
 
     @Override
     public List<ItemDto> searchItems(String text) {
-        if (text.isBlank()) return List.of();
-        String lowerText = text.toLowerCase();
+        if (text == null || text.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        String lowerText = text.trim().toLowerCase();
+
         return items.values().stream()
-                .filter(i -> i.getAvailable()
-                        && (i.getName().toLowerCase().contains(lowerText)
-                        || i.getDescription().toLowerCase().contains(lowerText)))
+                .filter(item -> item.getAvailable() != null && item.getAvailable() &&
+                        (item.getName().toLowerCase().contains(lowerText) ||
+                                item.getDescription().toLowerCase().contains(lowerText)))
                 .map(ItemMapper::toItemDto)
                 .toList();
     }

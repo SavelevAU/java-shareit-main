@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.*;
@@ -27,19 +28,22 @@ public class InMemoryUserService implements UserService {
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
         User existing = users.get(userId);
-        if (existing == null) return null;
-
-        // Проверка, что email не занят другим пользователем
-        Optional<User> duplicate = users.values().stream()
-                .filter(u -> u.getEmail().equals(userDto.getEmail()))
-                .findFirst();
-
-        if (duplicate.isPresent() && !duplicate.get().getId().equals(userId)) {
-            throw new IllegalArgumentException("Email is already in use");
+        if (existing == null) {
+            throw new NotFoundException("User with id=" + userId + " not found");
         }
 
-        existing.setName(userDto.getName());
-        existing.setEmail(userDto.getEmail());
+        // Обновляем только ненулевые поля
+        if (userDto.getName() != null) {
+            existing.setName(userDto.getName());
+        }
+
+        if (userDto.getEmail() != null) {
+            if (users.values().stream()
+                    .anyMatch(u -> u.getEmail().equals(userDto.getEmail()) && !u.getId().equals(userId))) {
+                throw new ConflictException("Email is already in use");
+            }
+            existing.setEmail(userDto.getEmail());
+        }
 
         return UserMapper.toUserDto(existing);
     }
