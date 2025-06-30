@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -12,6 +13,11 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (users.values().stream()
+                .anyMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
+
         User user = UserMapper.toUser(userDto);
         user.setId(idCounter.getAndIncrement());
         users.put(user.getId(), user);
@@ -22,8 +28,19 @@ public class InMemoryUserService implements UserService {
     public UserDto updateUser(Long userId, UserDto userDto) {
         User existing = users.get(userId);
         if (existing == null) return null;
+
+        // Проверка, что email не занят другим пользователем
+        Optional<User> duplicate = users.values().stream()
+                .filter(u -> u.getEmail().equals(userDto.getEmail()))
+                .findFirst();
+
+        if (duplicate.isPresent() && !duplicate.get().getId().equals(userId)) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
+
         existing.setName(userDto.getName());
         existing.setEmail(userDto.getEmail());
+
         return UserMapper.toUserDto(existing);
     }
 
@@ -34,7 +51,9 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public UserDto getUserById(Long userId) {
-        return UserMapper.toUserDto(users.get(userId));
+        return Optional.ofNullable(users.get(userId))
+                .map(UserMapper::toUserDto)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " not found"));
     }
 
     @Override
