@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user; // комент
 
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
