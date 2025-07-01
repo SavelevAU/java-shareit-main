@@ -1,12 +1,39 @@
 package ru.practicum.shareit.request;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
 
-/**
- * TODO Sprint add-item-requests.
- */
+import java.util.List;
+
 @RestController
-@RequestMapping(path = "/requests")
+@RequestMapping("/requests")
+@RequiredArgsConstructor
 public class ItemRequestController {
+    private final ItemRequestService requestService;
+
+    @PostMapping
+    public ResponseEntity<ItemRequestDto> createItemRequest(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestBody ItemRequestDto dto) {
+        return ResponseEntity.ok(requestService.createItemRequest(userId, dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ItemRequestDto>> getAllRequestsByUser(
+            @RequestHeader("X-Sharer-User-Id") Long userId) {
+        return ResponseEntity.ok(requestService.getAllRequestsByUser(userId));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<ItemRequestDto>> getAllRequests() {
+        return ResponseEntity.ok(requestService.getAllRequests());
+    }
+
+    @GetMapping("/{requestId}")
+    public ResponseEntity<ItemRequestDto> getRequestById(
+            @PathVariable Long requestId) {
+        return ResponseEntity.ok(requestService.getRequestById(requestId));
+    }
 }
